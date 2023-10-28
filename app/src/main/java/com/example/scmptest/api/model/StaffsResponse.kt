@@ -3,10 +3,10 @@ package com.example.scmptest.api.model
 import com.google.gson.annotations.SerializedName
 
 data class StaffsResponse(
-    @SerializedName("page" ) var page : String,
-    @SerializedName("per_page" ) var perPage : String,
-    @SerializedName("total" ) var total : String,
-    @SerializedName("total_pages" ) var totalPages : String,
+    @SerializedName("page" ) var page : Int,
+    @SerializedName("per_page" ) var perPage : Int,
+    @SerializedName("total" ) var total : Int,
+    @SerializedName("total_pages" ) var totalPages : Int,
     @SerializedName("data" ) var data : List<Staff>,
 )
 

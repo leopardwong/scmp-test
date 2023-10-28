@@ -10,6 +10,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -17,6 +18,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,15 +30,41 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.scmptest.ui.viewModel.LoginPageViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginPage() {
+fun LoginPage(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isEmailValid by remember { mutableStateOf(false) }
     var isPasswordValid by remember { mutableStateOf(false) }
+
     var isVisible by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+    var token by remember { mutableStateOf("") }
+
+    var errorMsg by remember { mutableStateOf("") }
+    var showErrorDialog by remember { mutableStateOf(false) }
+
+    val viewModel = LoginPageViewModel()
+
+    LaunchedEffect(token){
+        if(token.isNotEmpty()){
+            navController.navigate("staffList/${token}")
+        }
+    }
+
+    ErrorMsgDialog(
+        showErrorDialog = showErrorDialog,
+        errorMsg = errorMsg,
+        onDismiss = { showErrorDialog = false }
+    )
+
+    if(isLoading){
+        LoadingDialog()
+    }
 
     Column(
         modifier = Modifier
@@ -52,7 +81,7 @@ fun LoginPage() {
             value = email,
             onValueChange = { newEmail ->
                 email = newEmail
-                isEmailValid = isValidEmail(newEmail)
+                isEmailValid = viewModel.isValidEmail(newEmail)
             },
             label = { Text("Email") },
             isError = email.isNotEmpty() && !isEmailValid,
@@ -68,7 +97,7 @@ fun LoginPage() {
             value = password,
             onValueChange = { newPassword ->
                 password = newPassword
-                isPasswordValid = isValidPassword(newPassword)
+                isPasswordValid = viewModel.isValidPassword(newPassword)
             },
             label = { Text("Password") },
             visualTransformation = if (!isVisible) PasswordVisualTransformation() else VisualTransformation.None,
@@ -92,13 +121,20 @@ fun LoginPage() {
                     }
                 )
             },
-
-
             )
 
         Button(
             onClick = {
-                // Perform login here
+                viewModel.loginValid(
+                    email = email,
+                    password = password,
+                    token = {token = it},
+                    loading = { isLoading = it},
+                    error = {
+                        errorMsg = "Please Enter the correct Email or Password!"
+                        showErrorDialog = it
+                    }
+                )
             },
             enabled = isEmailValid && isPasswordValid,
             modifier = Modifier.fillMaxWidth()
@@ -108,12 +144,3 @@ fun LoginPage() {
     }
 }
 
-private fun isValidEmail(email: String): Boolean {
-    // Add your email validation logic here
-    return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-}
-
-private fun isValidPassword(password: String): Boolean {
-    // Add your password validation logic here
-    return password.matches(Regex("[a-zA-Z0-9]{6,10}"))
-}

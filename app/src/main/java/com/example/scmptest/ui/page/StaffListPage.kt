@@ -12,20 +12,46 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.scmptest.api.model.Staff
-import com.example.scmptest.api.model.StaffsResponse
+import com.example.scmptest.ui.viewModel.StaffListPageViewModel
 
 @Composable
-fun StaffListPage(
-    token: String,
-    staffList: List<Staff>,
-    isLastPage: Boolean,
-    onLoadMore: () -> Unit
-) {
+fun StaffListPage(token: String) {
+    val viewModel = StaffListPageViewModel()
+    var currentPage by remember { mutableStateOf(0) }
+    var totalPage by remember { mutableStateOf(0) }
+    var staffLists by remember { mutableStateOf<List<Staff>>(emptyList()) }
+    var errorMsg by remember { mutableStateOf("") }
+    var showErrorDialog by remember { mutableStateOf(false) }
+
+    viewModel.getStaffList(
+        token = token,
+        response = {response ->
+            currentPage = response.page
+            totalPage = response.totalPages
+            staffLists = response.data
+        },
+        error = {
+            errorMsg = "Please Check your internet!"
+            showErrorDialog = it
+        }
+    )
+
+    ErrorMsgDialog(
+        showErrorDialog = showErrorDialog,
+        errorMsg = errorMsg,
+        onDismiss = { showErrorDialog = false }
+    )
+
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -33,51 +59,23 @@ fun StaffListPage(
             text = "Token: $token",
             modifier = Modifier.padding(16.dp)
         )
-
         LazyColumn(
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(16.dp)
         ) {
-            items(staffList.size) {
-                StaffItemRow(staffList[it])
+            items(staffLists.size) {
+                StaffItem(staffLists[it])
             }
         }
-
-        if (isLastPage) {
+        if (totalPage > currentPage) {
             Button(
-                onClick = { onLoadMore() },
+                onClick = {  },//TODO: LoadMore Function
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
                 Text(text = "Load More")
             }
-        }
-    }
-}
-
-@Composable
-fun StaffItemRow(staff:Staff) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    ) {
-
-        AsyncImage(
-            modifier = Modifier.size(48.dp)
-                .clip(RoundedCornerShape(4.dp)),
-            model = staff.avatar,
-            contentDescription = null,
-        )
-
-        Column(
-            modifier = Modifier
-                .padding(start = 16.dp)
-                .weight(1f)
-        ) {
-            Text(text = staff.email)
-            Text(text = "${staff.lastName} ${staff.firstName}")
         }
     }
 }

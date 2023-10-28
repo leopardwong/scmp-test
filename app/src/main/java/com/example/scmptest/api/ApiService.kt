@@ -16,7 +16,7 @@ interface ApiService {
         @Body request: LoginRequest): LoginResponse
 
     @GET("users")
-    suspend fun getUser(
+    suspend fun getStaff(
         @Query("page") page: Int,
         @Header("Authorization") token: String
     ): StaffsResponse

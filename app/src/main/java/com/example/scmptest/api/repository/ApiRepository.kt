@@ -22,8 +22,8 @@ object ApiRepository {
         emit(ApiState(isOtherError = it))
     }
 
-    suspend fun getUserList(token: String) = flow {
-        val result = apiService.getUser(2,token)
+    suspend fun getStaffList(page:Int, token: String) = flow {
+        val result = apiService.getStaff(page,token)
         emit(ApiState(isSuccess = result))
     }.flowOn(Dispatchers.IO).onStart {
         emit(ApiState(isLoading = true))

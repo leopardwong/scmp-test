@@ -1,38 +1,42 @@
 package com.example.scmptest.ui.viewModel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.scmptest.api.model.LoginRequest
-import com.example.scmptest.api.repository.ApiRepository.getUserList
 import com.example.scmptest.api.repository.ApiRepository.login
-import kotlinx.coroutines.flow.flatMapConcat
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class LoginPageViewModel:ViewModel() {
 
-    fun getApi(){
+    fun isValidEmail(email: String): Boolean {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+    fun isValidPassword(password: String): Boolean {
+        return password.matches(Regex("[a-zA-Z0-9]{6,10}"))
+    }
+    fun loginValid(email:String,
+                   password: String,
+                   token:(String)->Unit,
+                   loading:(Boolean)->Unit,
+                   error:(Boolean)->Unit){
         viewModelScope.launch {
-            login(LoginRequest("eve.holt@reqres.in","cityslicka"))
-                .map { response ->
-                    response.isSuccess?.let {
-                        it.token
+            login(LoginRequest(email,password))
+                .collectLatest {
+                    it.isLoading?.let{
+                        loading(it)
                     }
-                }
-                .flatMapConcat { token ->
-                    println("token======$token")
-                    getUserList(token?:"")
-                }
-                .collect {
                     it.isSuccess?.let {
-                        println("isSuccess======$it")
+                        token(it.token)
                     }
                     it.isBizError?.let{
-                        println("isBizError======$it")
+                        error(true)
+                        Log.d("Error", "BizError: $it")
                     }
                     it.isOtherError?.let{
-
-                        println("isOtherError======$it")
+                        error(true)
+                        Log.d("Error", "Throwable: $it")
                     }
                 }
         }

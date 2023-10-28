@@ -69,7 +69,12 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.1.0-beta01")
     implementation("io.coil-kt:coil-compose:2.4.0")
 
-    //Retrofit
+
+    //navigation
+    implementation("androidx.navigation:navigation-compose:2.5.3")
+
+
+    //Retrofit & Gson
     implementation("com.squareup.retrofit2:adapter-rxjava:2.1.0")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-jackson:2.0.0")
