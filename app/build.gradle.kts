@@ -69,10 +69,8 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.1.0-beta01")
     implementation("io.coil-kt:coil-compose:2.4.0")
 
-
     //navigation
     implementation("androidx.navigation:navigation-compose:2.5.3")
-
 
     //Retrofit & Gson
     implementation("com.squareup.retrofit2:adapter-rxjava:2.1.0")
@@ -80,4 +78,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-jackson:2.0.0")
     implementation("com.google.code.gson:gson:2.6.2")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    //Unit Test
+    testImplementation("org.mockito:mockito-core:5.6.0")
 }
