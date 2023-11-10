@@ -65,6 +65,7 @@ fun LoginPage(navController: NavController) {
     if(isLoading){
         LoadingDialog()
     }
+    //it is because can't call @composable function in LaunchedEffect, that is reason why I didn't use LaunchedEffect to trigger LoadingDialog()
 
     Column(
         modifier = Modifier

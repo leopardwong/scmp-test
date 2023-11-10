@@ -33,18 +33,21 @@ fun StaffListPage(token: String) {
     var errorMsg by remember { mutableStateOf("") }
     var showErrorDialog by remember { mutableStateOf(false) }
 
-    viewModel.getStaffList(
-        token = token,
-        response = {response ->
-            currentPage = response.page
-            totalPage = response.totalPages
-            staffLists = response.data
-        },
-        error = {
-            errorMsg = "Please Check your internet!"
-            showErrorDialog = it
-        }
-    )
+    LaunchedEffect(token){
+        viewModel.getStaffList(
+            token = token,
+            response = {response ->
+                currentPage = response.page
+                totalPage = response.totalPages
+                staffLists = response.data
+            },
+            error = {
+                errorMsg = "Please Check your internet!"
+                showErrorDialog = it
+            }
+        )
+    }
+    //Put the getStaffList function into LaunchedEffect, because the function only needs to be called once, and the token value will not change after the page is created
 
     ErrorMsgDialog(
         showErrorDialog = showErrorDialog,
@@ -69,13 +72,26 @@ fun StaffListPage(token: String) {
         }
         if (totalPage > currentPage) {
             Button(
-                onClick = {  },//TODO: LoadMore Function
+                onClick = {
+                    currentPage += 1
+                    viewModel.loadMore(
+                        page = currentPage,
+                        token = token,
+                        existingList = staffLists,
+                        response = { staffLists = it },
+                        error = {
+                            errorMsg = "Please Check your internet!"
+                            showErrorDialog = it
+                        }
+                )
+                          },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
                 Text(text = "Load More")
             }
+            // Implemented loadMore Button
         }
     }
 }
